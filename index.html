@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RÜDIGER</title>
+<link rel="icon" type="image/png" href="img/muenzen/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RÜDIGER — Vaporwave, eskaliert.
+   Ein Viewport. Kein Text ausser Wortmarke und Linkleiste. Kein Scrollen.
+   Alles Fixe wird nur über transform/opacity bewegt; keine
+   animierte vollflächige Blend-Ebene (würgt den Compositor).
+   ============================================================ */
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  width:100%; height:100%;
+  height:100svh;
+  overflow:hidden;
+  background:#050008;
+  font-family:'Bebas Neue', sans-serif;
+  cursor:none;
+  overscroll-behavior:none;
+}
+
+img { user-select:none; -webkit-user-drag:none; }
+
+/* ---------- HIMMEL ---------------------------------------- */
+.sky {
+  position:fixed; inset:0; z-index:0;
+  background:linear-gradient(180deg,
+    #030006 0%, #0a0018 22%, #1b0040 46%,
+    #3b005e 60%, #12002a 78%, #050008 100%);
+}
+
+/* Nebel, Strahlen, Sterne, Hyperraum und Meeresengel auf einer
+   Leinwand: als Einzelebenen belegen sie zusammen über ein Gigabyte
+   Grafikspeicher, und der Browser lässt dann wahllos Ebenen fallen.
+   Für alles Grossflächige gilt deshalb: Leinwand mit kleiner eigener
+   Auflösung, nie eine hochskalierte Ebene. */
+#kosmos { position:fixed; inset:0; z-index:1; width:100%; height:100%; pointer-events:none; }
+
+/* «To the moon»: die Münze IST der Mond. JS zeichnet, CSS heiligt. */
+.mond {
+  position:fixed; z-index:6;
+  left:57vw; top:53vh;
+  width:0; height:0;
+  pointer-events:none;
+}
+.mond canvas {
+  position:absolute;
+  width:46vmin; height:46vmin; left:-23vmin; top:-23vmin;
+}
+.mond .gloria, .mond .hof { width:120vmin; height:120vmin; left:-60vmin; top:-60vmin; }
+.mond .gloria { animation:drehen 70s linear infinite; }
+.mond .hof { width:90vmin; height:90vmin; left:-45vmin; top:-45vmin; animation:hof 3.2s ease-in-out infinite; }
+@keyframes hof { 0%,100% { transform:scale(.92); opacity:.65; } 50% { transform:scale(1.1); opacity:1; } }
+
+/* ---------- SONNEN ----------------------------------------- */
+.sun {
+  position:absolute; left:0; top:0;
+  width:min(46vmin,420px); height:min(46vmin,420px);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:linear-gradient(180deg,#ff6ec7 0%,#ff2d78 38%,#ff6600 68%,#ffcc00 100%);
+  box-shadow:0 0 90px #ff2d78, 0 0 200px #ff006699;
+  overflow:hidden;
+  animation:sun-pulse 7s ease-in-out infinite;
+  pointer-events:none;
+}
+.sun::after {
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(180deg,
+    #050008 0 8px, transparent 8px 20px,
+    #050008 20px 26px, transparent 26px 34px,
+    #050008 34px 38px, transparent 38px 44px,
+    #050008 44px 47px, transparent 47px 51px,
+    #050008 51px 53px, transparent 53px 56px);
+  background-position:0 55%;
+}
+@keyframes sun-pulse {
+  0%,100% { transform:translate(-50%,-50%) scale(1); }
+  50%     { transform:translate(-50%,-50%) scale(1.12); }
+}
+
+/* kaputte Zweitsonne — kleinflächig, difference */
+.sun2 {
+  position:fixed; z-index:2;
+  width:min(18vmin,170px); height:min(18vmin,170px);
+  border-radius:50%;
+  left:39%; top:32%;
+  background:linear-gradient(180deg,#00ffee 0%,#0066ff 100%);
+  mix-blend-mode:difference;
+  opacity:.8;
+  animation:sun2-jump 11s steps(1) infinite;
+  pointer-events:none;
+}
+@keyframes sun2-jump {
+  0%,72%,100% { transform:translate(0,0); }
+  74%  { transform:translate(-36px,10px); }
+  80%  { transform:translate(20px,-18px); }
+  88%  { transform:translate(-8px,26px); }
+}
+
+/* ---------- BODEN ------------------------------------------ */
+.grid, .grid2 {
+  position:fixed; z-index:3;
+  bottom:0; left:-10vw; right:-10vw;
+  height:52vh;
+  background:
+    linear-gradient(to bottom, transparent 0%, #050008 96%),
+    repeating-linear-gradient(90deg, rgba(255,0,255,.45) 0 1px, transparent 1px 56px),
+    repeating-linear-gradient(0deg,  rgba(255,0,255,.45) 0 1px, transparent 1px 38px);
+  transform-origin:bottom center;
+  transform:perspective(380px) rotateX(42deg);
+  animation:grid-glitch 7s steps(1) infinite;
+  pointer-events:none;
+}
+.grid2 {
+  background:
+    linear-gradient(to bottom, transparent 0%, #050008 96%),
+    repeating-linear-gradient(90deg, rgba(0,255,238,.20) 0 1px, transparent 1px 56px),
+    repeating-linear-gradient(0deg,  rgba(0,255,238,.20) 0 1px, transparent 1px 38px);
+  transform:perspective(380px) rotateX(42deg) rotate(.6deg);
+  animation:grid-glitch2 9s steps(1) infinite;
+}
+@keyframes grid-glitch {
+  0%,84%,92%,100% { transform:perspective(380px) rotateX(42deg); }
+  86% { transform:perspective(380px) rotateX(42deg) translateX(4px); }
+  89% { transform:perspective(380px) rotateX(42deg) translateX(-7px); }
+}
+@keyframes grid-glitch2 {
+  0%,78%,88%,100% { transform:perspective(380px) rotateX(42deg) rotate(.6deg); }
+  81% { transform:perspective(380px) rotateX(42deg) rotate(.6deg) translateX(-5px) ; }
+  85% { transform:perspective(380px) rotateX(42deg) rotate(.6deg) translateX(6px); }
+}
+
+/* Sonnenspiegelung am Boden */
+.reflect {
+  position:fixed; z-index:3;
+  left:30%; bottom:6vh;
+  width:34vmin; height:14vh;
+  transform:translateX(-50%);
+  background:radial-gradient(ellipse at center, #ff2d7877 0%, #ff660033 45%, transparent 70%);
+  filter:blur(14px);
+  animation:reflect-puls 7s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes reflect-puls { 0%,100%{opacity:.7} 50%{opacity:1} }
+
+/* ---------- FIGUREN: WRAPPER = PARALLAX, KIND = CHAOS ------
+   Die Parallax-Verschiebung schreibt JS direkt als transform auf die
+   Wrapper. Eine CSS-Variable auf :root wäre eleganter, invalidiert
+   aber bei jeder Mausbewegung den Stil des gesamten Dokuments —
+   genau das hat den Browser in die Knie gezwungen. */
+.pw {
+  position:fixed;
+  z-index:5;
+  pointer-events:none;
+}
+.pw img, .pw .fx { display:block; width:100%; }
+
+/* Tiefenebenen: hinten wenig Parallax + Unschärfe, vorn viel */
+.d1 { --px:6px;  --py:4px;  z-index:4; }
+.d2 { --px:14px; --py:9px;  z-index:5; }
+.d3 { --px:26px; --py:16px; z-index:6; }
+.d4 { --px:44px; --py:28px; z-index:8; }
+
+/* --- Tier-Statuen: neongetönte Tempelwächter ---------------- */
+.statue img { filter:saturate(3.2) hue-rotate(var(--hr,0deg)) brightness(1.05) drop-shadow(0 0 18px rgba(255,0,255,.5)); }
+.statue.gespiegelt img { transform:scaleX(-1); }
+
+.gans-l  { left:2vw;  bottom:20vh; width:15vmin; --hr:290deg; animation:bob1 9s  ease-in-out infinite; }
+.gans-r  { right:2vw; bottom:21vh; width:15vmin; --hr:160deg; animation:bob2 11s ease-in-out infinite; }
+.hase-l  { left:17vw; bottom:14vh; width:17vmin; --hr:200deg; animation:bob2 13s ease-in-out infinite; }
+.hase-r  { right:16vw;bottom:13vh; width:17vmin; --hr:320deg; animation:bob1 10s ease-in-out infinite; }
+.schneck { left:40vw; bottom:9vh;  width:19vmin; --hr:90deg;  animation:bob1 14s ease-in-out infinite; }
+.frosch  { left:8vw;  top:9vh;     width:13vmin; --hr:40deg;  animation:schweben 17s ease-in-out infinite; }
+.schneck2{ right:30vw;bottom:5vh;  width:9vmin;  --hr:250deg; animation:bob2 8s  ease-in-out infinite; }
+
+@keyframes bob1 { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-14px) rotate(2deg)} }
+@keyframes bob2 { 0%,100%{transform:translateY(-8px) rotate(1.5deg)} 50%{transform:translateY(8px) rotate(-2.5deg)} }
+@keyframes schweben {
+  0%,100% { transform:translate(0,0) rotate(-6deg); }
+  33%     { transform:translate(26px,18px) rotate(4deg); }
+  66%     { transform:translate(-18px,34px) rotate(-2deg); }
+}
+
+/* --- Personen: Verzerrungssystem, überdreht ----------------- */
+
+/* Riese rechts, difference — dominiert die halbe Seite */
+.riese { right:-9vw; bottom:-6vh; width:56vmin; }
+.riese img {
+  filter:saturate(2.4) contrast(1.5) hue-rotate(300deg);
+  mix-blend-mode:difference;
+  animation:riese-sway 12s ease-in-out infinite;
+}
+@keyframes riese-sway {
+  0%,100% { transform:rotate(-3deg) scale(1); }
+  50%     { transform:rotate(2deg)  scale(1.06); }
+}
+
+/* Winzling daneben — der Skalenkontrast ist der Punkt */
+.zwerg { right:40vw; bottom:34vh; width:6vmin; }
+.zwerg img { filter:saturate(4) hue-rotate(180deg); animation:zwerg-zappeln .4s steps(2) infinite; }
+@keyframes zwerg-zappeln { 0%{transform:translate(0,0) rotate(-4deg)} 50%{transform:translate(2px,-3px) rotate(5deg)} 100%{transform:translate(-2px,2px) rotate(-4deg)} }
+
+/* Offener Mund, quergestreckt, exclusion — hoch geschoben, damit der
+   Mund sichtbar ist und nicht der gestreckte Rollkragen als roter
+   Block die Mitte frisst */
+.mund { left:26vw; top:-7vh; width:34vmin; }
+.mund img {
+  transform:scaleX(2.2) skewY(-4deg);
+  filter:saturate(3) hue-rotate(60deg) contrast(1.7);
+  mix-blend-mode:exclusion;
+  opacity:.8;
+  animation:mund-stretch 7s ease-in-out infinite;
+}
+@keyframes mund-stretch {
+  0%,100% { transform:scaleX(2.2) skewY(-4deg); }
+  50%     { transform:scaleX(1.3) scaleY(1.55) skewY(3deg); }
+}
+
+/* Spiegelzwillinge — symmetrisches Doppelwesen */
+.zwilling { left:1vw; bottom:26vh; width:30vmin; display:flex; }
+.zwilling img { width:50%; filter:saturate(3.4) hue-rotate(200deg) contrast(1.5); }
+.zwilling img:first-child { transform:scaleX(-1); }
+.zwilling { animation:zwilling-atmen 6s ease-in-out infinite; }
+@keyframes zwilling-atmen {
+  0%,100% { transform:scaleY(1) rotate(0deg); }
+  50%     { transform:scaleY(1.25) rotate(-2deg); }
+}
+
+/* Slit-Scan-Schmiere: Foto als Hintergrund, zerdehnt, steps() */
+.schmiere {
+  left:54vw; top:0; width:10vmin; height:64vh;
+  background-image:var(--bild);
+  background-size:100% 340%;
+  background-position:50% 0%;
+  filter:saturate(3) hue-rotate(320deg) contrast(1.4);
+  opacity:.75;
+  animation:schmiere-lauf 3.5s steps(9) infinite;
+}
+@keyframes schmiere-lauf {
+  0%   { background-position:50% 0%; }
+  100% { background-position:50% 100%; }
+}
+
+/* feTurbulence-Wabern — genau zwei Elemente */
+.wab1 { left:64vw; top:52vh; width:24vmin; }
+.wab1 img { filter:url(#warpA) saturate(2.6) hue-rotate(20deg); animation:wab-dreh 26s linear infinite; }
+.wab2 { left:12vw; top:38vh; width:20vmin; }
+.wab2 img { filter:url(#warpB) saturate(3) hue-rotate(130deg); opacity:.9; }
+@keyframes wab-dreh { to { transform:rotate(360deg); } }
+
+/* Kopfüber — direkt aus der alten Seite, grösser */
+.kopfueber { right:24vw; top:4vh; width:16vmin; }
+.kopfueber img { transform:rotate(180deg); filter:sepia(1) saturate(4) hue-rotate(210deg); animation:kopf-pendel 5s ease-in-out infinite; }
+@keyframes kopf-pendel {
+  0%,100% { transform:rotate(176deg) scale(1.35); }
+  50%     { transform:rotate(187deg) scale(1.5); }
+}
+
+/* Solarisierter Geist, gross und blass hinter allem */
+.geist { left:34vw; bottom:2vh; width:44vmin; }
+.geist img {
+  filter:invert(1) hue-rotate(90deg) saturate(2) blur(2px);
+  opacity:.22;
+  animation:geist-drift 19s ease-in-out infinite;
+}
+@keyframes geist-drift {
+  0%,100% { transform:translateX(0) skewX(8deg); }
+  50%     { transform:translateX(-40px) skewX(-6deg); }
+}
+
+/* RGB-Glitch-Stapel ×2 */
+.glitch { position:fixed; pointer-events:none; }
+.glitch img { position:absolute; inset:0; width:100%; }
+.glitch .r { position:relative; filter:saturate(0) brightness(1.2); mix-blend-mode:multiply; opacity:.85; }
+.glitch .g { filter:hue-rotate(120deg) saturate(3); mix-blend-mode:screen; opacity:.6; animation:g-shift .22s steps(3) infinite; }
+.glitch .b { filter:hue-rotate(240deg) saturate(3); mix-blend-mode:screen; opacity:.6; animation:b-shift .17s steps(2) infinite; }
+.glitch1 { left:47vw; top:24vh; width:16vmin; z-index:7; }
+.glitch2 { left:5vw;  top:60vh; width:12vmin; z-index:7; animation:glitch2-huepf 13s steps(1) infinite; }
+@keyframes g-shift { 0%{transform:translate(4px,-3px)} 33%{transform:translate(-5px,1px)} 66%{transform:translate(3px,4px)} 100%{transform:translate(-2px,-4px)} }
+@keyframes b-shift { 0%{transform:translate(-4px,3px)} 50%{transform:translate(5px,-2px)} 100%{transform:translate(-3px,-3px)} }
+@keyframes glitch2-huepf {
+  0%,70%,100% { transform:translate(0,0); }
+  73% { transform:translate(30px,-20px); }
+  82% { transform:translate(-16px,12px); }
+}
+
+/* ---------- ERFREULICHE TIERE -------------------------------
+   Ausgeschnitten aus dem Adventskalender der erfreulichen Tiere.
+   Filter stehen nur auf Elementen, deren Filter sich nie ändert:
+   einmal gerastert, danach bewegt der Compositor. */
+@keyframes drehen { to { transform:rotate(360deg); } }
+
+/* Planetensystem. Die Sonne liegt im selben 3D-Kontext wie die
+   Bahnen, damit die Tiere wirklich hinter ihr verschwinden: auf den
+   Zwischenebenen sind filter/opacity/overflow tabu, sie würden den
+   Kontext flachdrücken. */
+.system {
+  position:fixed; z-index:4;
+  left:30%; top:44%;
+  width:0; height:0;
+  perspective:130vmin;
+  pointer-events:none;
+}
+.szene, .bahn, .umlauf, .arm, .gegen {
+  position:absolute; left:0; top:0;
+  width:0; height:0;
+  transform-style:preserve-3d;
+}
+.bahn   { transform:rotateZ(var(--roll)) rotateX(var(--kipp)); }
+.ring {
+  position:absolute;
+  left:calc(var(--r) * -1); top:calc(var(--r) * -1);
+  width:calc(var(--r) * 2); height:calc(var(--r) * 2);
+  --op:.6;
+}
+.umlauf { animation:drehen var(--d) linear infinite; }
+.gegen  { animation:drehen var(--d) linear infinite reverse; }
+.arm    { transform:rotateZ(var(--w)) translateX(var(--r)) rotateZ(calc(var(--w) * -1)); }
+.planet {
+  position:absolute; left:0; top:0;
+  width:var(--g);
+  transform-origin:0 0;
+  transform:rotateX(calc(var(--kipp) * -1)) rotateZ(calc(var(--roll) * -1)) translate(-50%,-50%);
+}
+.planet img { display:block; width:100%; filter:saturate(1.7) contrast(1.15) drop-shadow(0 0 14px var(--rf)); }
+
+/* Mandalas: ein Rad, eine Ebene, beliebig viele Speichen */
+.mandala {
+  position:fixed; z-index:var(--z,1);
+  left:var(--x); top:var(--y);
+  width:0; height:0;
+  animation:drehen var(--d) linear infinite;
+  pointer-events:none;
+}
+.mandala canvas {
+  position:absolute;
+  width:calc(var(--r) * 2 + var(--g)); height:calc(var(--r) * 2 + var(--g));
+  left:calc(var(--r) * -1 - var(--g) / 2); top:calc(var(--r) * -1 - var(--g) / 2);
+}
+
+/* Baby-Feuerfisch: Satellit mit Sonnensegel */
+.feuerfisch { left:50vw; top:24vh; width:74vmin; z-index:2; }
+.feuerfisch img {
+  filter:saturate(1.8) brightness(1.25) drop-shadow(0 0 26px #a06bff);
+  animation:drehen 110s linear infinite;
+}
+
+/* Schwarzes Loch */
+.loch { left:47vw; bottom:17vh; width:17vmin; height:17vmin; z-index:7; }
+.loch .kern {
+  position:absolute; inset:0; border-radius:50%;
+  background:#000;
+  box-shadow:0 0 0 3px #ffd98a, 0 0 22px 6px #ff8a00, 0 0 70px 14px #ff2d7899;
+}
+.loch .scheibe {
+  position:absolute; inset:-85%;
+  transform:rotateZ(-14deg) rotateX(74deg);
+}
+.loch .scheibe.vorn { clip-path:inset(50% 0 0 0); }
+.loch .scheibe i {
+  position:absolute; inset:0; border-radius:50%;
+  background:conic-gradient(#ff6600,#ffe066,#ff2d78,#ff00ff,#ffcc00,#ff2d78,#fff3c0,#ff6600);
+  -webkit-mask:radial-gradient(closest-side, transparent 41%, #000 46%, #000 62%, transparent 98%);
+          mask:radial-gradient(closest-side, transparent 41%, #000 46%, #000 62%, transparent 98%);
+  animation:drehen 3.5s linear infinite;
+}
+.schluck {
+  position:absolute; left:50%; top:50%; width:0; height:0;
+  animation:schluck-dreh 13s cubic-bezier(.5,0,.85,.45) infinite;
+  animation-delay:var(--dl);
+}
+.schluck img {
+  position:absolute; width:var(--g); left:calc(var(--g) / -2); top:-4vmin;
+  opacity:0;
+  filter:saturate(2.2) contrast(1.2) hue-rotate(var(--hr,0deg)) drop-shadow(0 0 10px #ff8a00);
+  animation:schluck-zug 13s cubic-bezier(.5,0,.85,.45) infinite;
+  animation-delay:var(--dl);
+}
+@keyframes schluck-dreh {
+  from { transform:rotate(var(--w)); }
+  to   { transform:rotate(calc(var(--w) + 860deg)); }
+}
+/* Spaghettifizierung kurz vor dem Horizont */
+@keyframes schluck-zug {
+  0%   { transform:translateX(44vmin) rotate(0deg) scale(.2); opacity:0; }
+  12%  { opacity:1; }
+  70%  { transform:translateX(17vmin) rotate(-300deg) scale(1); opacity:1; }
+  92%  { transform:translateX(7vmin) rotate(-360deg) scale(1.9,.22); opacity:1; }
+  100% { transform:translateX(0) rotate(-360deg) scale(.3,.02); opacity:0; }
+}
+
+/* Dem Schlitzrüssler zieht es die Nase ins Loch */
+.ruessler { left:62vw; bottom:8vh; width:17vmin; z-index:9; }
+.ruessler img {
+  transform-origin:88% 80%;
+  filter:saturate(2) drop-shadow(0 0 16px #ff8a00aa);
+  animation:ruessler-zug 5s ease-in-out infinite;
+}
+@keyframes ruessler-zug {
+  0%,100% { transform:scaleX(1) skewX(0deg); }
+  40%     { transform:scaleX(1.75) skewX(-9deg); }
+  52%     { transform:scaleX(1.65) skewX(-6deg); }
+  60%     { transform:scaleX(.9) skewX(3deg); }
+}
+
+/* Spiegeleiqualle als UFO, entführt den rosa Frosch */
+.ufo {
+  position:fixed; z-index:12;
+  left:0; top:36vh; width:27vmin;
+  animation:ufo-flug 36s cubic-bezier(.45,0,.4,1) infinite;
+  pointer-events:none;
+}
+.ufo .rumpf { display:block; width:100%; position:relative; filter:saturate(1.6) brightness(1.1) drop-shadow(0 0 22px #ffcc00); }
+.ufo .strahl {
+  position:absolute; left:-12%; top:62%; width:124%; height:48vmin;
+  background:linear-gradient(180deg, rgba(0,255,238,.75), rgba(0,255,238,.06));
+  clip-path:polygon(36% 0, 64% 0, 100% 100%, 0 100%);
+  opacity:0;
+  animation:ufo-strahl 36s linear infinite;
+}
+.ufo .beute {
+  position:absolute; left:30%; top:60%; width:40%;
+  opacity:0;
+  filter:saturate(1.8) drop-shadow(0 0 14px #00ffee);
+  animation:ufo-beute 36s linear infinite;
+}
+@keyframes ufo-flug {
+  0%   { transform:translate(-40vw,10vh) rotate(8deg); }
+  22%  { transform:translate(30vw,0) rotate(-3deg); }
+  32%  { transform:translate(32vw,-2vh) rotate(2deg); }
+  46%  { transform:translate(30vw,1vh) rotate(-2deg); }
+  56%  { transform:translate(33vw,0) rotate(0deg); }
+  72%  { transform:translate(64vw,-18vh) rotate(-16deg); }
+  84%,100% { transform:translate(130vw,8vh) rotate(10deg); }
+}
+@keyframes ufo-strahl {
+  0%,21%,55%,100% { opacity:0; }
+  25%,35%,45%     { opacity:.85; }
+  30%,40%,50%     { opacity:.55; }
+}
+@keyframes ufo-beute {
+  0%,24%  { transform:translateY(40vmin) rotate(0deg) scale(1); opacity:0; }
+  27%     { transform:translateY(38vmin) rotate(0deg) scale(1); opacity:1; }
+  48%     { transform:translateY(6vmin) rotate(400deg) scale(.7); opacity:1; }
+  53%,100%{ transform:translateY(0) rotate(540deg) scale(.1); opacity:0; }
+}
+
+/* Vorbeiflug mit Regenbogenschweif (JS befüllt) */
+.flug {
+  position:fixed; left:0; top:var(--y);
+  width:var(--g); z-index:var(--z);
+  transform:translateX(-90vw);
+  animation:flug var(--d) linear forwards;
+  pointer-events:none;
+}
+.flug.rueck { animation-name:flug-rueck; }
+@keyframes flug      { from { transform:translate(-60vw,0); } to { transform:translate(165vw,var(--dy)); } }
+@keyframes flug-rueck { from { transform:translate(120vw,0) scaleX(-1); } to { transform:translate(-105vw,var(--dy)) scaleX(-1); } }
+.flug .flatter { animation:flatter var(--fl) ease-in-out infinite; }
+.flug img {
+  position:relative; display:block; width:100%;
+  transform:rotate(var(--rot,0deg));
+  filter:saturate(1.9) contrast(1.1) hue-rotate(var(--hr,0deg)) drop-shadow(0 0 16px #ffffff88);
+}
+@keyframes flatter {
+  0%,100% { transform:translateY(-1.6vmin) rotate(-4deg); }
+  50%     { transform:translateY(1.6vmin) rotate(4deg); }
+}
+.schweif {
+  position:absolute; right:58%; top:35%;
+  width:27vw; height:30%;
+  background:linear-gradient(180deg,
+    #ff2d78 0 16.6%, #ff8a00 0 33.3%, #ffe600 0 50%,
+    #19ff7a 0 66.6%, #00c8ff 0 83.3%, #b14bff 0);
+  -webkit-mask:linear-gradient(90deg, transparent, #000a 55%, #000);
+          mask:linear-gradient(90deg, transparent, #000a 55%, #000);
+  opacity:.9;
+}
+
+/* Hyperflug: aus dem Fluchtpunkt am Betrachter vorbei (JS befüllt) */
+.hyper {
+  position:fixed; z-index:var(--z);
+  left:30%; top:44%;
+  width:15vmin;
+  opacity:0;
+  filter:saturate(2) contrast(1.15) drop-shadow(0 0 8px #ff00ff);
+  animation:hyper var(--d) cubic-bezier(.75,0,.95,.55) infinite;
+  animation-delay:var(--dl);
+  pointer-events:none;
+}
+@keyframes hyper {
+  0%   { transform:translate(-50%,-50%) scale(.02); opacity:0; }
+  15%  { opacity:1; }
+  92%  { opacity:1; }
+  100% { transform:translate(-50%,-50%) translate(var(--dx),var(--dy)) scale(3.1) rotate(var(--rot)); opacity:0; }
+}
+
+/* Blaufusstölpel, Astronaut */
+.toelpel { left:78vw; top:57vh; width:13vmin; z-index:9; }
+.toelpel .astro { position:relative; animation:taumeln 34s linear infinite; }
+.toelpel img { filter:saturate(1.8) drop-shadow(0 0 14px #00c8ff); }
+.helm {
+  position:absolute; border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255,255,255,.85) 0 5%, rgba(255,255,255,.25) 12%, transparent 24%),
+    radial-gradient(circle, rgba(160,230,255,.08) 55%, rgba(160,230,255,.35) 88%, rgba(255,255,255,.8) 97%);
+  box-shadow:0 0 18px rgba(0,255,238,.6), inset 0 0 14px rgba(255,255,255,.35);
+}
+.toelpel .helm { left:8%; top:21%; width:96%; aspect-ratio:1; }
+@keyframes taumeln {
+  0%   { transform:translate(0,0) rotate(0deg); }
+  25%  { transform:translate(-9vmin,-6vmin) rotate(90deg); }
+  50%  { transform:translate(2vmin,-12vmin) rotate(180deg); }
+  75%  { transform:translate(7vmin,-3vmin) rotate(270deg); }
+  100% { transform:translate(0,0) rotate(360deg); }
+}
+
+/* Kleideraffe, erleuchtet */
+.guru { left:35vw; bottom:21vh; width:14vmin; z-index:7; }
+.guru .schein {
+  position:absolute; left:50%; top:20%;
+  width:26vmin; height:26vmin; margin:-13vmin 0 0 -13vmin;
+  border-radius:50%;
+  background:repeating-conic-gradient(#ffe600cc 0 8deg, #ff00ff55 8deg 16deg, #00ffee99 16deg 22deg, transparent 22deg 30deg);
+  -webkit-mask:radial-gradient(closest-side, transparent 34%, #000 38%, #000a 60%, transparent 100%);
+          mask:radial-gradient(closest-side, transparent 34%, #000 38%, #000a 60%, transparent 100%);
+  animation:drehen 24s linear infinite reverse;
+}
+.guru .leib { position:relative; animation:schwebe-sitz 7s ease-in-out infinite; }
+.guru img { filter:saturate(2) contrast(1.15) drop-shadow(0 0 18px #ffe600aa); }
+@keyframes schwebe-sitz { 0%,100% { transform:translateY(1.2vmin); } 50% { transform:translateY(-2.4vmin); } }
+
+/* Brückenechse mit Laser aus dem Scheitelauge */
+.tuatara { left:17vw; bottom:-1vh; width:34vmin; z-index:7; }
+.tuatara .echse { position:relative; transform-origin:0 100%; animation:echse 9s ease-in-out infinite; }
+.tuatara img { filter:saturate(2.6) hue-rotate(70deg) contrast(1.25) drop-shadow(0 0 18px #19ff7a); }
+@keyframes echse { 0%,100% { transform:rotate(3deg); } 50% { transform:rotate(-7deg); } }
+.laser {
+  position:absolute; left:80%; top:8%;
+  width:120vmax; height:5px; margin-top:-2px;
+  border-radius:3px;
+  transform-origin:0 50%;
+  opacity:0;
+  background:linear-gradient(90deg, #fff, #ff2d78 6%, #ff00ff 60%, transparent);
+  box-shadow:0 0 12px 3px #ff2d78, 0 0 34px 8px #ff00ff77;
+  animation:laser 9s ease-in-out infinite;
+}
+@keyframes laser {
+  0%,38%,82%,100% { transform:rotate(-62deg) scaleX(0); opacity:0; }
+  42%  { transform:rotate(-62deg) scaleX(1); opacity:1; }
+  78%  { transform:rotate(-14deg) scaleX(1); opacity:1; }
+}
+
+/* Sarkastischer Fransenkopf */
+.fransen { left:0; bottom:8vh; width:30vmin; z-index:8; }
+.fransen img {
+  transform-origin:0 100%;
+  filter:saturate(2.4) brightness(1.35) contrast(1.15) drop-shadow(0 0 16px #ccff00aa);
+  animation:schnapp 4.6s cubic-bezier(.3,1.6,.5,1) infinite;
+}
+@keyframes schnapp {
+  0%,62%,100% { transform:scale(1) skewY(0deg); }
+  70% { transform:scale(1.28,1.18) skewY(-4deg); }
+  76% { transform:scale(1.04,.96) skewY(1deg); }
+  82% { transform:scale(1.24,1.2) skewY(-3deg); }
+}
+
+/* Haubenhühner: Hardrockband, an der Schnittkante gespiegelt */
+.huehner { left:50vw; bottom:0; width:62vmin; margin-left:-12vmin; z-index:6; display:flex; }
+.huehner img { width:50%; filter:saturate(1.2) contrast(1.35) drop-shadow(0 0 12px #ff00ff); transform-origin:50% 100%; animation:headbang .75s ease-in-out infinite; }
+.huehner img + img { animation-name:headbang-s; }
+@keyframes headbang   { 0%,100% { transform:rotate(-2.5deg); } 50% { transform:translateY(1.2vmin) rotate(3.5deg); } }
+@keyframes headbang-s { 0%,100% { transform:scaleX(-1) rotate(-2.5deg); } 50% { transform:translateY(1.2vmin) scaleX(-1) rotate(3.5deg); } }
+
+/* Sternmull: der Star der Vorstellung */
+.sternmull { left:61vw; top:37vh; width:17vmin; z-index:6; }
+.sternmull .glanz {
+  position:absolute; left:20%; top:74%;
+  width:30vmin; height:30vmin; margin:-15vmin 0 0 -15vmin;
+  border-radius:50%;
+  background:repeating-conic-gradient(rgba(255,110,199,.75) 0 6deg, transparent 6deg 22.5deg);
+  -webkit-mask:radial-gradient(closest-side, #000, transparent);
+          mask:radial-gradient(closest-side, #000, transparent);
+  animation:drehen 16s linear infinite;
+}
+.sternmull img { position:relative; filter:saturate(2.4) brightness(1.5) drop-shadow(0 0 12px #ff6ec7); }
+
+/* Randbewohner: ihre Schnittkante liegt auf der Fensterkante,
+   darum kein seitlicher Parallax */
+.fransen, .laterne, .wuehle { --px:0px; }
+.schlaefer { left:0; top:0; width:15vmin; z-index:12; }
+.schlaefer img { transform-origin:0 0; filter:saturate(1.8) hue-rotate(-25deg) drop-shadow(0 0 10px #ff2d78); animation:baumeln 6s ease-in-out infinite; }
+@keyframes baumeln { 0%,100% { transform:rotate(0deg); } 50% { transform:rotate(-3deg) scale(1.04); } }
+.laterne { right:0; top:55vh; width:24vmin; z-index:9; }
+.laterne img { filter:saturate(2.4) contrast(1.2) drop-shadow(0 0 14px #ffcc00aa); }
+.laterne .glanz {
+  position:absolute; left:-22%; top:-18%; width:78%; height:140%;
+  background:radial-gradient(closest-side, #fff6a0dd, #ffcc0066 45%, transparent);
+  animation:laterne 3.4s ease-in-out infinite;
+}
+@keyframes laterne { 0%,100% { opacity:.1; transform:scale(.8); } 50% { opacity:.85; transform:scale(1.15); } }
+.wuehle { right:0; bottom:8vh; width:25vmin; z-index:9; }
+.wuehle img { filter:saturate(2.6) hue-rotate(250deg) contrast(1.2) drop-shadow(0 0 14px #b14bff); animation:wuehlen 8s ease-in-out infinite; }
+@keyframes wuehlen { 0%,100% { transform:translateX(0); } 50% { transform:translateX(34%); } }
+
+/* Coronaschnecke: gläserner Geist */
+.ruesselmeer { left:88vw; top:8vh; width:26vmin; margin-left:-13vmin; z-index:4; }
+.ruesselmeer img { filter:saturate(2.2) brightness(1.6) drop-shadow(0 0 22px #00c8ff); animation:meeresgeist 21s ease-in-out infinite; }
+@keyframes meeresgeist {
+  0%,100% { transform:translate(0,0) rotate(-10deg); }
+  50%     { transform:translate(-16vw,14vh) rotate(22deg); }
+}
+
+/* Parade am Horizont: zwei gleiche Hälften, Versatz genau eine */
+.parade {
+  position:fixed; z-index:3;
+  left:0; bottom:33vh;
+  display:flex; align-items:flex-end;
+  width:max-content;
+  animation:parade 46s linear infinite;
+  pointer-events:none;
+}
+.parade img { display:block; height:8vmin; margin:0 5vmin; filter:saturate(2.2) brightness(1.15) drop-shadow(0 0 8px #ff00ff); }
+@keyframes parade { from { transform:translateX(-50%); } to { transform:translateX(0); } }
+
+/* ---------- REGIE -------------------------------------------
+   Kein transform: den schreiben Parallax und Animationen. */
+.nr { opacity:0; scale:.35; rotate:14deg; transition:opacity .8s ease, scale .9s cubic-bezier(.2,1.5,.4,1), rotate .9s ease; }
+.nr:not(.da) { display:none !important; }
+.nr.auf { opacity:var(--op,1); scale:1; rotate:0deg; }
+
+/* ---------- MÜNZREGEN ---------------------------------------
+   Eine Leinwand statt vierzig Ebenen. */
+#regen {
+  position:fixed; inset:0; z-index:11;
+  width:100%; height:100%;
+  pointer-events:none;
+}
+
+/* ---------- TECHBRO-INSIGNIEN ------------------------------- */
+
+/* Pump & Dump: zwei gleiche Hälften, Versatz genau eine */
+.kurs {
+  position:fixed; z-index:8;
+  left:0; bottom:15vh;
+  width:200vw; height:46vh;
+  animation:kurs 40s linear infinite;
+  opacity:.82;
+  pointer-events:none;
+}
+.kurs canvas { display:block; width:100%; height:100%; }
+@keyframes kurs { to { transform:translateX(-50%); } }
+
+/* Proof of Work: Igel im Dauerlauf auf der rollenden Münze */
+.mining {
+  position:fixed; z-index:8;
+  left:0; bottom:9vh;
+  width:25vmin;
+  transform:translateX(-60vw);
+  animation:mining 20s linear infinite;
+  pointer-events:none;
+}
+.mining .rad { display:block; width:100%; filter:drop-shadow(0 0 22px #ffae00); animation:drehen 3.4s linear infinite; }
+.mining .arbeiter {
+  position:absolute; left:8%; bottom:88%; width:84%;
+  filter:saturate(1.8) drop-shadow(0 0 10px #ff00ff);
+  animation:arbeiten .28s ease-in-out infinite alternate;
+}
+@keyframes mining { from { transform:translateX(-34vw); } to { transform:translateX(112vw); } }
+@keyframes arbeiten { from { transform:translateY(0) rotate(-7deg); } to { transform:translateY(-9%) rotate(6deg); } }
+
+/* Laseraugen: liegen auf dem Balken des Riesen und wanken mit ihm */
+.augen { position:absolute; inset:0; animation:riese-sway 12s ease-in-out infinite; }
+.auge { position:absolute; width:0; height:0; }
+.auge.li { left:31%; top:23.5%; }
+.auge.re { left:59%; top:26%; }
+.auge b {
+  position:absolute; left:-11vmin; top:-11vmin; width:22vmin; height:22vmin;
+  background:
+    radial-gradient(closest-side, #fff 0 7%, #ff5a5a 14%, rgba(255,0,40,.55) 34%, transparent 78%),
+    radial-gradient(ellipse 50% 3.5% at center, rgba(255,140,140,.95), transparent);
+  animation:glut 1.7s ease-in-out infinite;
+}
+@keyframes glut { 0%,100% { transform:scale(.8); opacity:.8; } 50% { transform:scale(1.15); opacity:1; } }
+.auge i {
+  position:absolute; left:0; top:-.5vmin;
+  width:150vmax; height:1vmin; border-radius:1vmin;
+  transform-origin:0 50%;
+  background:linear-gradient(90deg, #fff 0, #ff8080 3%, #ff0033 30%, rgba(255,0,60,.5) 75%, transparent);
+  box-shadow:0 0 14px 3px rgba(255,0,50,.8), 0 0 40px 8px rgba(255,0,80,.45);
+  opacity:0;
+  animation:laserblick 8s ease-in-out infinite;
+}
+@keyframes laserblick {
+  0%,30%,86%,100% { transform:rotate(172deg) scaleX(0); opacity:0; }
+  36%  { transform:rotate(172deg) scaleX(1); opacity:1; }
+  58%  { transform:rotate(199deg) scaleX(1); opacity:1; }
+  80%  { transform:rotate(183deg) scaleX(1); opacity:1; }
+}
+
+/* ---------- WORTMARKE: VIERFACH GESTAPELT ------------------- */
+.marke {
+  position:fixed; z-index:10;
+  left:0; right:0; top:7vh;
+  pointer-events:none;
+  line-height:.82;
+  white-space:nowrap;
+  font-size:20vw;                 /* Startwert, JS setzt randlos */
+}
+.marke span {
+  position:absolute; left:0; top:0;
+  padding-left:.02em;
+  letter-spacing:-.01em;
+}
+.marke .mw { position:relative; display:inline-block; visibility:hidden; } /* nur Messkörper */
+/* Ü-Punkte: JS misst sie im geladenen Font aus */
+.marke canvas { position:absolute; filter:drop-shadow(0 0 .03em #ffae00); }
+/* Die geblendeten Kopien (difference/screen) driften in Stufen:
+   jede Positionsänderung einer Blend-Ebene verrechnet die volle
+   Wortmarken-Fläche neu — als steps() passiert das ein paar Mal pro
+   Zyklus statt in jedem Frame, und das Springen passt zum Glitch. */
+.m1 { color:transparent; -webkit-text-stroke:3px #ff00ff; animation:m-drift1 11s ease-in-out infinite; }
+.m2 { color:#fff; mix-blend-mode:difference; animation:m-drift2 13s steps(5) infinite; }
+.m3 { color:#00ffee; mix-blend-mode:screen; opacity:.55; animation:m-drift3 7s steps(4) infinite; }
+.m4 { color:#ff2d78; opacity:.5; filter:url(#warpT); animation:m-drift1 17s ease-in-out infinite reverse; }
+@keyframes m-drift1 { 0%,100%{transform:translate(0,0) rotate(-1.6deg)} 50%{transform:translate(9px,12px) rotate(.8deg)} }
+@keyframes m-drift2 { 0%,100%{transform:translate(-6px,4px)} 50%{transform:translate(7px,-7px)} }
+@keyframes m-drift3 { 0%,100%{transform:translate(7px,-5px)} 50%{transform:translate(-9px,6px)} }
+
+/* ---------- STÖRSCHICHT ------------------------------------- */
+.scan {
+  position:fixed; inset:0; z-index:11; pointer-events:none;
+  background:
+    radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.5) 100%),
+    repeating-linear-gradient(180deg, transparent 0 3px, rgba(0,0,0,.14) 3px 4px);
+}
+.track {
+  position:fixed; left:0; right:0; z-index:11; pointer-events:none;
+  height:5vh; top:-8vh;
+  background:linear-gradient(180deg, transparent, rgba(255,255,255,.07) 40%, rgba(0,255,238,.08) 60%, transparent);
+  animation:track-run 8s linear infinite;
+}
+/* transform statt top — top würde pro Frame Layout rechnen */
+@keyframes track-run { to { transform:translateY(118vh); } }
+/* ---------- SPASMUS ----------------------------------------- */
+body.spasm .mund img   { transform:scaleX(2.9) skewY(9deg); filter:saturate(5) hue-rotate(280deg) contrast(2); }
+body.spasm .riese img, body.spasm .augen { transform:rotate(4deg) scale(1.12) translateX(-24px); }
+body.spasm .marke .m1  { transform:translate(-14px,6px) skewX(-9deg); }
+body.spasm .marke .m3  { transform:translate(16px,-9px); opacity:.9; }
+body.spasm .grid       { transform:perspective(380px) rotateX(42deg) translateX(-12px); }
+body.spasm .glitch1    { transform:translate(10px,-14px) scale(1.1); }
+body.spasm .zwilling   { transform:scaleY(1.4) skewX(6deg); }
+body.spasm .feuerfisch img { transform:rotate(40deg) scale(1.15); }
+body.spasm .guru .leib { transform:translateY(-5vmin) skewX(12deg); }
+body.spasm .loch .kern { transform:scale(1.3); }
+
+/* ---------- CURSOR ------------------------------------------ */
+.cursor {
+  position:fixed; z-index:99;
+  width:22px; height:22px;
+  border:2px solid #ff00ff;
+  border-radius:50%;
+  pointer-events:none;
+  mix-blend-mode:difference;
+  transform:translate(-50%,-50%);
+}
+.cursor::after {
+  content:''; position:absolute; left:50%; top:50%;
+  width:4px; height:4px; background:#00ffee; border-radius:50%;
+  transform:translate(-50%,-50%);
+}
+
+/* ---------- LINKLEISTE -------------------------------------- */
+/* Nur die <a> fangen Zeiger-Ereignisse: der Klick daneben gehört
+   weiterhin der Explosion. */
+.orte {
+  position:fixed; z-index:20;
+  left:0; right:0; bottom:0;
+  display:flex; flex-wrap:wrap;
+  justify-content:center; align-items:baseline;
+  gap:.1em 1.5em;
+  padding:12px 16px calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg, transparent 0%, rgba(5,0,8,.88) 60%);
+  font-size:clamp(15px,2.3vmin,20px);
+  letter-spacing:.07em;
+  text-align:center;
+  pointer-events:none;
+}
+.orte a {
+  pointer-events:auto;
+  color:#00ffee;
+  text-decoration:none;
+  opacity:.78;
+  text-shadow:0 0 10px rgba(0,255,238,.55);
+  transition:opacity .25s ease, color .25s ease, text-shadow .25s ease;
+}
+.orte a:hover, .orte a:focus-visible {
+  opacity:1; color:#fff;
+  text-shadow:0 0 6px #00ffee, 0 0 20px #ff00ff;
+}
+.orte a.post {
+  color:#ffcc00;
+  text-shadow:0 0 10px rgba(255,170,0,.55);
+}
+.orte a.post:hover, .orte a.post:focus-visible {
+  color:#fff;
+  text-shadow:0 0 6px #ffcc00, 0 0 20px #ff6600;
+}
+
+/* ---------- MOBILE ------------------------------------------ */
+@media (max-width:760px) {
+  .orte { font-size:14px; gap:.1em 1.1em; padding-bottom:calc(14px + env(safe-area-inset-bottom)); }
+  .geist, .schmiere, .zwerg, .schneck2, .gans-r { display:none; }
+  .mond { left:68vw; top:37vh; }
+  .mond canvas { width:64vmin; height:64vmin; left:-32vmin; top:-32vmin; }
+  .mining { width:34vmin; bottom:17vh; }
+  .riese { width:74vmin; right:-16vw; }
+  .mund  { width:52vmin; left:10vw; }
+  .zwilling { width:46vmin; bottom:30vh; }
+  .wab1 { width:34vmin; left:58vw; top:56vh; }
+  .wab2 { width:30vmin; top:34vh; }
+  .glitch1 { width:26vmin; left:52vw; }
+  .glitch2 { width:20vmin; }
+  .kopfueber { width:24vmin; right:10vw; }
+  .hase-l { width:24vmin; } .hase-r { width:24vmin; }
+  .gans-l { width:22vmin; } .schneck { width:26vmin; }
+  .frosch { width:19vmin; }
+  .ruesselmeer, .huehner, .schluck:nth-of-type(even) { display:none; }
+  .feuerfisch { left:22vw; top:26vh; width:104vmin; }
+  .toelpel { left:72vw; top:44vh; width:20vmin; }
+  .guru    { left:44vw; bottom:26vh; width:22vmin; }
+  .guru .schein { width:40vmin; height:40vmin; margin:-20vmin 0 0 -20vmin; }
+  .loch    { left:52vw; bottom:15vh; width:20vmin; height:20vmin; }
+  .ruessler{ left:74vw; bottom:12vh; width:22vmin; }
+  .tuatara { left:8vw; bottom:6vh; width:44vmin; }
+  .fransen { bottom:17vh; width:38vmin; }
+  .laterne { top:36vh; width:36vmin; }
+  .wuehle  { bottom:13vh; width:34vmin; }
+  .ufo     { width:40vmin; top:33vh; }
+  .schlaefer { width:22vmin; }
+  .hyper   { width:22vmin; }
+  .parade img { height:13vmin; }
+  .cursor { display:none; }
+  body { cursor:auto; }
+}
+
+/* ---------- RUHE AUF WUNSCH --------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation:none !important;
+    transition:none !important;
+  }
+  .wab1 img, .wab2 img, .m4 { filter:none; }
+  .m4 { opacity:.25; }
+  .mining { transform:translateX(40vw); }
+  .ufo { transform:translate(38vw,0); }
+  .huehner img + img { transform:scaleX(-1); }
+  .cursor { display:none; }
+  body { cursor:auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- SVG-Werkzeuge: Verzerrungsfilter + Münz-Symbol -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Wabern in Stufen statt kontinuierlich: feTurbulence rechnet bei
+         jeder Frequenzänderung den Filter auf der CPU neu. Diskret alle
+         ~1.5 s springt es glitchig (passt) statt 60x pro Sekunde zu
+         kosten. Der Titel-Warp ist komplett statisch — er lag auf der
+         vollbreiten Wortmarke und war der teuerste Posten der Seite. -->
+    <filter id="warpA" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012 0.028" numOctaves="2" seed="7" result="n">
+        <animate attributeName="baseFrequency" dur="9s" calcMode="discrete"
+          values="0.012 0.028;0.016 0.04;0.02 0.05;0.014 0.033;0.018 0.045;0.012 0.028" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="42"/>
+    </filter>
+    <filter id="warpB" x="-25%" y="-25%" width="150%" height="150%">
+      <feTurbulence type="turbulence" baseFrequency="0.02 0.008" numOctaves="1" seed="3" result="n">
+        <animate attributeName="baseFrequency" dur="7s" calcMode="discrete"
+          values="0.02 0.008;0.026 0.014;0.032 0.02;0.023 0.011;0.02 0.008" repeatCount="indefinite"/>
+      </feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="34"/>
+    </filter>
+    <filter id="warpT" x="-10%" y="-30%" width="120%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.004 0.02" numOctaves="1" seed="11" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="16"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- RAUM -->
+<div class="sky"></div>
+<canvas id="kosmos"></canvas>
+<div class="mandala" id="mandala1" style="--x:30%;--y:44%;--g:21vmin;--r:42vmin;--s:36deg;--k:-32deg;--d:90s"></div>
+<div class="mandala zwei" id="mandala2" style="--z:4;--x:calc(47vw + 8.5vmin);--y:calc(83vh - 8.5vmin);--g:11vmin;--r:25vmin;--s:40deg;--k:0deg;--d:64s"></div>
+<div class="pw d1 feuerfisch"><img src="img/tiere/feuerfisch.webp" alt=""></div>
+<div class="mond"><canvas class="gloria" id="gloria" width="384" height="384"></canvas><canvas class="hof" id="hof" width="128" height="128"></canvas><canvas id="mond" width="340" height="340"></canvas></div>
+<div class="system"><div class="szene" id="szene"><div class="sun"></div></div></div>
+<div class="sun2"></div>
+<div class="kurs" id="kurs"></div>
+<div class="parade" id="parade"></div>
+<div class="grid"></div>
+<div class="grid2"></div>
+<div class="reflect"></div>
+
+<!-- TIER-ORNAMENTE -->
+<div class="pw d2 statue gans-l"><img src="img/cut/11.webp" alt=""></div>
+<div class="pw d2 statue gespiegelt gans-r"><img src="img/cut/11.webp" alt=""></div>
+<div class="pw d3 statue hase-l"><img src="img/cut/16.webp" alt=""></div>
+<div class="pw d3 statue gespiegelt hase-r"><img src="img/cut/16.webp" alt=""></div>
+<div class="pw d3 statue schneck"><img src="img/cut/12.webp" alt=""></div>
+<div class="pw d1 statue frosch"><img src="img/cut/13.webp" alt=""></div>
+<div class="pw d4 statue schneck2"><img src="img/cut/15.webp" alt=""></div>
+
+<!-- PERSONEN -->
+<div class="pw d1 geist"><img src="img/cut/06.webp" alt=""></div>
+<div class="pw d2 mund"><img src="img/cut/04.webp" alt=""></div>
+<div class="pw d2 schmiere fx" style="--bild:url('img/cut/01.webp')"></div>
+<div class="pw d3 zwilling"><img src="img/cut/02.webp" alt=""><img src="img/cut/02.webp" alt=""></div>
+<div class="pw d3 wab2"><img src="img/cut/09.webp" alt=""></div>
+<div class="pw d3 kopfueber"><img src="img/cut/17.webp" alt=""></div>
+<div class="pw d4 wab1"><img src="img/cut/05.webp" alt=""></div>
+<div class="pw d4 riese"><img src="img/cut/07.webp" alt=""><div class="augen"><div class="auge li"><i></i><b></b></div><div class="auge re"><i></i><b></b></div></div></div>
+<div class="pw d4 zwerg"><img src="img/cut/03.webp" alt=""></div>
+
+<div class="glitch glitch1">
+  <img class="r" src="img/cut/08.webp" alt="">
+  <img class="g" src="img/cut/08.webp" alt="">
+  <img class="b" src="img/cut/08.webp" alt="">
+</div>
+<div class="glitch glitch2">
+  <img class="r" src="img/cut/14.webp" alt="">
+  <img class="g" src="img/cut/14.webp" alt="">
+  <img class="b" src="img/cut/14.webp" alt="">
+</div>
+
+<!-- ERFREULICHE TIERE -->
+<div class="pw d1 ruesselmeer"><img src="img/tiere/ruesselmeer.webp" alt=""></div>
+<div class="pw d2 sternmull"><div class="glanz"></div><img src="img/tiere/sternmull.webp" alt=""></div>
+<div class="pw d2 huehner"><img src="img/tiere/huehner.webp" alt=""><img src="img/tiere/huehner.webp" alt=""></div>
+<div class="pw d3 loch">
+  <div class="scheibe"><i></i></div>
+  <div class="kern"></div>
+  <div class="scheibe vorn"><i></i></div>
+  <div class="schluck" style="--w:10deg;--dl:-1s;--g:10vmin"><img src="img/tiere/igel.webp" alt=""></div>
+  <div class="schluck" style="--w:150deg;--dl:-3.6s;--g:11vmin;--hr:40deg"><img src="img/tiere/ameise.webp" alt=""></div>
+  <div class="schluck" style="--w:260deg;--dl:-6.2s;--g:10vmin"><img src="img/tiere/tenrek.webp" alt=""></div>
+  <div class="schluck" style="--w:70deg;--dl:-8.8s;--g:9vmin;--hr:180deg"><img src="img/tiere/kaefer.webp" alt=""></div>
+  <div class="schluck" style="--w:330deg;--dl:-11.4s;--g:9vmin"><img src="img/tiere/blatt2.webp" alt=""></div>
+</div>
+<div class="pw d3 ruessler"><img src="img/tiere/ruessler.webp" alt=""></div>
+<div class="pw d3 guru"><div class="schein"></div><div class="leib"><img src="img/tiere/affe.webp" alt=""></div></div>
+<div class="pw d3 tuatara"><div class="echse"><div class="laser"></div><img src="img/tiere/tuatara.webp" alt=""></div></div>
+<div class="pw d4 fransen"><img src="img/tiere/fransen.webp" alt=""></div>
+<div class="pw d4 wuehle"><img src="img/tiere/wuehle.webp" alt=""></div>
+<div class="pw d4 laterne"><img src="img/tiere/laterne.webp" alt=""><div class="glanz"></div></div>
+<div class="pw d4 toelpel"><div class="astro"><img src="img/tiere/toelpel.webp" alt=""><div class="helm"></div></div></div>
+<div class="pw schlaefer"><img src="img/tiere/schlaefer.webp" alt=""></div>
+<div class="ufo">
+  <div class="strahl"></div>
+  <img class="beute" src="img/tiere/frosch.webp" alt="">
+  <img class="rumpf" src="img/tiere/spiegelei.webp" alt="">
+</div>
+<div id="fluege"></div>
+<div id="hyperflug"></div>
+
+<!-- MÜNZREGEN -->
+<div class="mining"><img class="arbeiter" src="img/tiere/igel.webp" alt=""><img class="rad" src="img/muenzen/rad.webp" alt=""></div>
+<canvas id="regen"></canvas>
+
+<!-- WORTMARKE -->
+<h1 class="marke" id="marke" aria-label="RÜDIGER">
+  <span class="mw">RÜDIGER</span><span class="m1" aria-hidden="true">RÜDIGER</span><span class="m2" aria-hidden="true">RÜDIGER</span><span class="m3" aria-hidden="true">RÜDIGER</span><span class="m4" aria-hidden="true">RÜDIGER</span>
+</h1>
+
+<!-- STÖRSCHICHT -->
+<div class="scan"></div>
+<div class="track"></div>
+
+<!-- LINKLEISTE -->
+<nav class="orte" aria-label="Weitere Seiten und Kontakt">
+  <a href="https://www.adventskalender.ruediger.broker/" target="_blank" rel="noopener">Adventskalender der erfreulichen Tiere</a>
+  <a href="https://zh-protoplattform.ruediger.broker/" target="_blank" rel="noopener">Zürcher Quellensuche</a>
+  <a href="https://ruedtim.github.io/luftbild_verortung/" target="_blank" rel="noopener">Luftbild-Verortung Zürich</a>
+  <a href="https://ruedtim.github.io/glamhack26-box-viewer/" target="_blank" rel="noopener">Provenance Pursuit</a>
+  <a href="https://ruedtim.github.io/glamhack26-similar-search/" target="_blank" rel="noopener">Bildähnlichkeit fürs Umbenennen</a>
+  <a href="https://leo-star.ch/" target="_blank" rel="noopener">leo-star.ch</a>
+  <a class="post" href="mailto:info@ruediger.broker">info@ruediger.broker</a>
+</nav>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor" style="left:-40px;top:-40px"></div>
+
+<script>
+(function(){
+  'use strict';
+  var ruhig = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fein  = matchMedia('(hover: hover)').matches;
+
+  /* ---------- Tiere: Planeten, Mandalas, Parade ---------------- */
+  var T = function(n){ return 'img/tiere/' + n + '.webp'; };
+  var zufall = function(a, b){ return a + Math.random() * (b - a); };
+
+  (function(){
+    var BAHNEN = [
+      { r:34, kipp:72, roll:-14, d:19, f:'#00ffee', t:[['kaerpfling',12],['blatt1',9]] },
+      { r:50, kipp:76, roll:9,   d:31, f:'#ff00ff', t:[['fledermaus',15],['garnele',17],['fuchs',13]] },
+      { r:70, kipp:70, roll:-5,  d:47, f:'#ffcc00', t:[['motte',13],['frosch',13],['weih',17],['gecko',17]] }
+    ];
+    var html = '';
+    BAHNEN.forEach(function(b){
+      html += '<div class="bahn" style="--r:'+b.r+'vmin;--kipp:'+b.kipp+'deg;--roll:'+b.roll+
+              'deg;--d:'+b.d+'s;--rf:'+b.f+'"><canvas class="ring" width="512" height="512"></canvas><div class="umlauf">';
+      b.t.forEach(function(t, i){
+        html += '<div class="arm" style="--w:'+(360/b.t.length*i)+'deg"><div class="gegen">'+
+                '<div class="planet" style="--g:'+t[1]+'vmin"><img src="'+T(t[0])+'" alt=""></div></div></div>';
+      });
+      html += '</div></div>';
+    });
+    document.getElementById('szene').insertAdjacentHTML('beforeend', html);
+    document.querySelectorAll('.ring').forEach(function(r, i){
+      var c = r.getContext('2d');
+      c.strokeStyle = BAHNEN[i].f; c.lineWidth = 2;
+      c.beginPath(); c.arc(256, 256, 254, 0, 7); c.stroke();
+    });
+  })();
+
+  (function(){
+    function rad(id, tier, n, g, r, k, ton){
+      var el = document.getElementById(id), cv = document.createElement('canvas'), b = new Image();
+      cv.width = cv.height = 560;
+      el.appendChild(cv);
+      b.onload = function(){
+        var c = cv.getContext('2d'), m = 560/(2*r + g), w = g*m, h = w*b.naturalHeight/b.naturalWidth;
+        function speichen(){
+          for (var i = 0; i < n; i++){
+            c.save(); c.translate(280, 280); c.rotate(i*2*Math.PI/n); c.translate(0, -r*m); c.rotate(k);
+            c.drawImage(b, -w/2, -h/2, w, h); c.restore();
+          }
+        }
+        speichen();
+        if (ton){
+          var maske = document.createElement('canvas'); maske.width = maske.height = 560;
+          maske.getContext('2d').drawImage(cv, 0, 0);
+          c.globalCompositeOperation = 'hue'; c.fillStyle = ton; c.fillRect(0, 0, 560, 560);
+          c.globalCompositeOperation = 'destination-in'; c.drawImage(maske, 0, 0);
+        }
+      };
+      b.src = T(tier);
+    }
+    rad('mandala1', 'glaucus', 10, 21, 42, -.56);
+    rad('mandala2', 'frosch', 9, 11, 25, 0, '#00ff88');
+
+    var zug = ['tenrek','igel','ameise','blatt1','huehner','kaefer','sternmull','blatt2'], html = '';
+    for (var k = 0; k < 2; k++) zug.forEach(function(t){ html += '<img src="'+T(t)+'" alt="">'; });
+    document.getElementById('parade').innerHTML = html;
+  })();
+
+  /* ---------- Kurs: Pump & Dump ------------------------------- */
+  (function(){
+    var N = 30, B = 1200/N, cv = document.createElement('canvas'), c = cv.getContext('2d'), alt, h, i;
+    cv.width = 2400; cv.height = 340;
+    var F = 3.4, linie = [];
+    c.shadowBlur = 14;
+    for (h = 0; h < 2; h++){
+      alt = 88;
+      for (i = 0; i < N; i++){
+        var neu = i < 22 ? 90 - 84*Math.pow(i/21, 2.6) + (i % 3 === 1 ? 4 : 0)
+                : i === 22 ? 93 : 90 + (i % 2 ? 2 : -2);
+        var x = (h*N + i)*B, o = Math.min(alt, neu), u = Math.max(alt, neu);
+        c.fillStyle = c.shadowColor = neu <= alt ? '#19ff7a' : '#ff1f4b';
+        c.fillRect(x + B*.44, (o - 4)*F, B*.12, (u - o + 8)*F);
+        c.fillRect(x + B*.14, o*F, B*.72, Math.max(1.5, u - o)*F);
+        linie.push([x + B/2, Math.min(97, neu + 6)*F]);
+        alt = neu;
+      }
+    }
+    c.strokeStyle = c.shadowColor = '#ff00ff'; c.lineWidth = 3;
+    c.beginPath(); linie.forEach(function(q){ c.lineTo(q[0], q[1]); }); c.stroke();
+    document.getElementById('kurs').appendChild(cv);
+  })();
+
+  /* ---------- Münzen -------------------------------------------
+     Bögen mit 24 Ansichten einer halben Umdrehung; Vorder- und
+     Rückseite sind gleich, also schliesst die Schleife nach 180°. */
+  var MUENZE = 208, ANSICHTEN = 24, BOGEN = {};
+  ['toelpel','fuchs','frosch','affe','mond'].forEach(function(n){
+    BOGEN[n] = new Image(); BOGEN[n].src = 'img/muenzen/' + n + '.webp';
+  });
+  var PUPPE = new Image(); PUPPE.src = T('puppe');
+  function fertig(b){ return b.complete && b.naturalWidth > 0; }
+
+  function praege(c, art, ph, gr){
+    var b = BOGEN[art];
+    if (!fertig(b)) return;
+    var k = Math.floor((ph - Math.floor(ph))*ANSICHTEN) % ANSICHTEN;
+    c.drawImage(b, (k % 8)*MUENZE, ((k/8)|0)*MUENZE, MUENZE, MUENZE, -gr/2, -gr/2, gr, gr);
+  }
+
+  /* Additive Lichter, einmal vorgerechnet */
+  function leinwand(g, malen){
+    var c = document.createElement('canvas'); c.width = c.height = g; malen(c.getContext('2d'), g); return c;
+  }
+  var HOF = leinwand(128, function(c, g){
+    var v = c.createRadialGradient(g/2,g/2,0,g/2,g/2,g/2);
+    v.addColorStop(0,'rgba(255,190,60,.75)'); v.addColorStop(.5,'rgba(255,120,0,.28)'); v.addColorStop(1,'rgba(255,80,0,0)');
+    c.fillStyle = v; c.fillRect(0,0,g,g);
+  });
+  var BLITZ = leinwand(160, function(c, g){
+    c.translate(g/2,g/2); c.globalCompositeOperation = 'lighter';
+    [[1,.045,'255,255,255'],[.045,1,'255,255,255'],[.5,.03,'0,255,238'],[.03,.5,'255,0,255'],[.2,.2,'255,240,200']].forEach(function(s){
+      c.save(); if (s[2] === '0,255,238' || s[2] === '255,0,255') c.rotate(Math.PI/4);
+      c.scale(s[0], s[1]);
+      var v = c.createRadialGradient(0,0,0,0,0,g/2);
+      v.addColorStop(0,'rgba('+s[2]+',1)'); v.addColorStop(.3,'rgba('+s[2]+',.45)'); v.addColorStop(1,'rgba('+s[2]+',0)');
+      c.fillStyle = v; c.beginPath(); c.arc(0,0,g/2,0,7); c.fill(); c.restore();
+    });
+  });
+  var SCHLIERE = leinwand(64, function(c, g){
+    var v = c.createLinearGradient(0,0,0,g);
+    v.addColorStop(0,'rgba(255,60,160,0)'); v.addColorStop(.6,'rgba(255,150,0,.35)'); v.addColorStop(1,'rgba(255,226,130,.95)');
+    c.fillStyle = v; c.beginPath();
+    c.moveTo(g/2,0); c.quadraticCurveTo(g*.86,g*.6,g*.94,g); c.lineTo(g*.06,g); c.quadraticCurveTo(g*.14,g*.6,g/2,0); c.fill();
+  });
+
+  var salve = function(){};
+  (function(){
+    var cv = document.getElementById('regen'), c = cv.getContext('2d');
+    var mc = document.getElementById('mond').getContext('2d');
+    var marke = document.getElementById('marke'), punkte = [];
+    var W, H, S, regen = [], spass = [], wellen = [], zeit = 0, vorher = 0;
+    var ARTEN = ['frosch','toelpel','fuchs','affe','toelpel','frosch','affe','puppe'];
+
+    function groesse(){
+      W = innerWidth; H = innerHeight;
+      S = Math.min(devicePixelRatio || 1, Math.sqrt(2.6e6/(W*H)));
+      cv.width = W*S; cv.height = H*S;
+    }
+    function neu(i, n){
+      var t = i/n, gr = (44 + Math.pow(t, 1.7)*165) * Math.max(.62, Math.min(1.25, Math.min(W,H)/850));
+      return { x:Math.random(), y:Math.random()*1.3 - .2, gr:gr, v:(90 + t*190)*(.8 + Math.random()*.5),
+               art:ARTEN[i % ARTEN.length], ph:Math.random(), dreh:(.35 + Math.random()*.75)*(Math.random()<.5 ? -1 : 1),
+               w:Math.random()*6.3, vw:(Math.random()-.5)*1.4, sch:Math.random()*6.3, t:t };
+    }
+    function saeen(){
+      var n = W < 760 ? 11 : 20;
+      regen = [];
+      for (var i = 0; i < n; i++) regen.push(neu(i, n));
+    }
+
+    function stueck(m, x, y, a){
+      var cs = Math.cos(m.w)*S, sn = Math.sin(m.w)*S;
+      c.setTransform(S,0,0,S,x*S,y*S);
+      c.globalCompositeOperation = 'lighter';
+      c.globalAlpha = .7*a;
+      c.drawImage(HOF, -m.gr*.95, -m.gr*.95, m.gr*1.9, m.gr*1.9);
+      if (m.v){ c.globalAlpha = .5*a; c.drawImage(SCHLIERE, -m.gr*.46, -m.gr*2.5, m.gr*.92, m.gr*2.5); }
+      c.globalCompositeOperation = 'source-over';
+      c.globalAlpha = a;
+      c.setTransform(cs,sn,-sn,cs,x*S,y*S);
+      if (m.art === 'puppe'){
+        if (fertig(PUPPE)){ c.scale(Math.cos(m.ph*Math.PI*2)*.9 || .01, 1); c.drawImage(PUPPE, -m.gr*.26, -m.gr*.65, m.gr*.52, m.gr*1.3); }
+      } else praege(c, m.art, m.ph, m.gr);
+      var f = m.ph - Math.floor(m.ph), g = Math.exp(-Math.pow((f - .1)/.05, 2)) + .7*Math.exp(-Math.pow((f - .9)/.04, 2));
+      if (g > .05){
+        c.setTransform(S,0,0,S,x*S,y*S);
+        c.globalCompositeOperation = 'lighter'; c.globalAlpha = Math.min(1, g)*a;
+        var l = m.gr*(m.art === 'fuchs' ? 2.2 : 1.5)*(.6 + g*.5);
+        c.drawImage(BLITZ, -m.gr*.2 - l/2, -m.gr*.24 - l/2, l, l);
+        c.globalCompositeOperation = 'source-over';
+      }
+    }
+
+    function mond(){
+      var b = BOGEN.mond;
+      if (!fertig(b)) return;
+      var g = 340, f = (zeit/2.6 % 1)*24, k = Math.floor(f) % 24, rest = f - Math.floor(f);
+      mc.clearRect(0,0,g,g);
+      mc.globalAlpha = 1;
+      mc.drawImage(b, (k % 6)*g, ((k/6)|0)*g, g, g, 0, 0, g, g);
+      k = (k + 1) % 24; mc.globalAlpha = rest;
+      mc.drawImage(b, (k % 6)*g, ((k/6)|0)*g, g, g, 0, 0, g, g);
+    }
+
+    function ueben(){
+      punkte.forEach(function(p, i){
+        p.clearRect(0,0,MUENZE,MUENZE);
+        p.save(); p.translate(MUENZE/2, MUENZE/2);
+        praege(p, i ? 'affe' : 'frosch', (i ? 1 - zeit/1.3 % 1 : zeit/1.3), MUENZE);
+        p.restore();
+      });
+    }
+
+    /* Ü-Punkte im tatsächlich geladenen Font suchen: über der
+       Oberkante des U stehen genau zwei Tintenblöcke. */
+    function umlaut(){
+      var G = 400, l = document.createElement('canvas'); l.width = l.height = G*1.5;
+      var d = l.getContext('2d', {willReadFrequently:true}), fam = getComputedStyle(marke).fontFamily;
+      d.font = getComputedStyle(marke).fontWeight + ' ' + G + 'px ' + fam;
+      var mu = d.measureText('U'), mr = d.measureText('RÜ').width - d.measureText('Ü').width;
+      var A = mu.fontBoundingBoxAscent, D = mu.fontBoundingBoxDescent, basis = G*1.25;
+      if (!(A > 0)) return;
+      d.fillText('Ü', 40, basis);
+      var oben = Math.round(basis - mu.actualBoundingBoxAscent - 3);
+      if (oben < 2) return;
+      var px = d.getImageData(0, 0, l.width, oben).data, spalte = [], y0 = oben, y1 = 0, x, y;
+      for (x = 0; x < l.width; x++) for (y = 0; y < oben; y++)
+        if (px[(y*l.width + x)*4 + 3] > 90){ spalte[x] = 1; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+      var bl = [], an = -1;
+      for (x = 0; x <= l.width; x++){
+        if (spalte[x] && an < 0) an = x;
+        if (!spalte[x] && an >= 0){ bl.push([an, x]); an = -1; }
+      }
+      if (bl.length !== 2) return;
+      marke.querySelectorAll('canvas').forEach(function(q){ q.remove(); });
+      var gl = Math.max(bl[0][1] - bl[0][0], y1 - y0)/G*1.5;
+      gl = Math.min(gl, (bl[1][0] + bl[1][1] - bl[0][0] - bl[0][1])/2/G*1.04);
+      punkte = bl.map(function(b){
+        var q = document.createElement('canvas'); q.width = q.height = MUENZE;
+        var mx = .02 - .01 + (mr + (b[0] + b[1])/2 - 40)/G;
+        var my = (.82 + (A - D)/G)/2 + ((y0 + y1)/2 - basis)/G;
+        q.style.cssText = 'width:'+gl+'em;height:'+gl+'em;left:'+(mx - gl/2)+'em;top:'+(my - gl/2)+'em';
+        marke.appendChild(q);
+        return q.getContext('2d');
+      });
+      ueben();
+    }
+
+    function bild(dt){
+      c.setTransform(1,0,0,1,0,0); c.globalAlpha = 1;
+      c.clearRect(0,0,cv.width,cv.height);
+      var halb = document.body.classList.contains('sparsam');
+      regen.forEach(function(m, i){
+        if (halb && i % 2) return;
+        m.y += m.v*dt/H; m.ph += m.dreh*dt; m.w += m.vw*dt;
+        if (m.y*H > H + m.gr*2.6){ m.y = -m.gr/H; m.x = Math.random(); }
+        stueck(m, m.x*W + Math.sin(zeit*.7 + m.sch)*m.gr*.35, m.y*H, 1);
+      });
+      for (var i = spass.length - 1; i >= 0; i--){
+        var s = spass[i];
+        s.vy += 1500*dt; s.x += s.vx*dt; s.y += s.vy*dt; s.ph += s.dreh*dt; s.w += s.vw*dt;
+        if (s.y > H + s.gr){ spass.splice(i, 1); continue; }
+        stueck(s, s.x, s.y, 1);
+      }
+      c.setTransform(S,0,0,S,0,0); c.globalCompositeOperation = 'lighter';
+      for (i = wellen.length - 1; i >= 0; i--){
+        var q = wellen[i], f = (q[2] += dt/.9), r = (1 - Math.pow(1 - Math.min(1, f), 3))*Math.min(W, H)*.52;
+        if (f >= 1){ wellen.splice(i, 1); continue; }
+        [['#ff00ff', 16, .3], ['#00ffee', 4, .9]].forEach(function(s){
+          c.strokeStyle = s[0]; c.lineWidth = s[1]; c.globalAlpha = s[2]*(1 - f);
+          c.beginPath(); c.arc(q[0], q[1], r, 0, 7); c.stroke();
+        });
+      }
+    }
+
+    salve = function(x, y){
+      wellen.push([x, y, 0]);
+      for (var i = 0; i < 16 && spass.length < 64; i++){
+        var r = -Math.PI/2 + (Math.random()-.5)*1.7, k = 480 + Math.random()*760;
+        spass.push({ x:x, y:y, vx:Math.cos(r)*k, vy:Math.sin(r)*k, gr:26 + Math.random()*58,
+                     art:ARTEN[(Math.random()*7)|0], ph:Math.random(), dreh:(Math.random()-.5)*5,
+                     w:Math.random()*6.3, vw:(Math.random()-.5)*9 });
+      }
+    };
+
+    groesse(); saeen();
+    addEventListener('resize', function(){ groesse(); if (ruhig) bild(0); }, {passive:true});
+    umlaut();
+    if (document.fonts && document.fonts.load)
+      document.fonts.load('100px "Bebas Neue"', 'RÜDIGER').then(umlaut, function(){});
+
+    if (ruhig){
+      addEventListener('load', function(){ bild(0); mond(); ueben(); });
+      return;
+    }
+    requestAnimationFrame(function lauf(t){
+      var dt = vorher ? Math.min(.05, (t - vorher)/1000) : 0;
+      vorher = t; zeit += dt;
+      bild(dt); mond(); ueben();
+      requestAnimationFrame(lauf);
+    });
+  })();
+
+  /* ---------- Kosmos ------------------------------------------- */
+  (function(){
+    var g = document.getElementById('gloria').getContext('2d'), h = document.getElementById('hof').getContext('2d'), v, i;
+    g.translate(192, 192);
+    for (i = 0; i < 18; i++){
+      [[0, 4.5, 'rgba(255,214,90,.6)'], [12, 2.6, 'rgba(255,247,200,.45)']].forEach(function(s){
+        var a = (i*20 + s[0])*Math.PI/180, b = s[1]*Math.PI/180;
+        g.fillStyle = s[2]; g.beginPath(); g.moveTo(0,0); g.arc(0,0,192,a - b,a + b); g.fill();
+      });
+    }
+    v = g.createRadialGradient(0,0,50,0,0,192); v.addColorStop(0,'#000'); v.addColorStop(1,'rgba(0,0,0,0)');
+    g.globalCompositeOperation = 'destination-in'; g.fillStyle = v; g.fillRect(-192,-192,384,384);
+    v = h.createRadialGradient(64,64,0,64,64,64);
+    v.addColorStop(0,'rgba(255,190,40,.75)'); v.addColorStop(.55,'rgba(255,120,0,.28)'); v.addColorStop(1,'rgba(255,120,0,0)');
+    h.fillStyle = v; h.fillRect(0,0,128,128);
+  })();
+
+  var warp = function(){};
+  (function(){
+    var cv = document.getElementById('kosmos'), c = cv.getContext('2d'), W, H, S, zeit = 0, vorher = 0, schub = 0, ziel = 0;
+    var ENGEL = new Image(); ENGEL.src = T('engel');
+    function wolke(f){
+      return leinwand(128, function(x, g){
+        var v = x.createRadialGradient(g/2,g/2,0,g/2,g/2,g/2);
+        v.addColorStop(0, f + ',.5)'); v.addColorStop(1, f + ',0)');
+        x.fillStyle = v; x.fillRect(0,0,g,g);
+      });
+    }
+    var NEBEL = [ [wolke('rgba(255,0,160'), .22, .18, 41], [wolke('rgba(0,190,255'), .85, .10, 57], [wolke('rgba(120,40,255'), .60, .78, 49] ];
+    var STRAHLEN = leinwand(512, function(x, g){
+      x.translate(g/2,g/2);
+      for (var i = 0; i < 12; i++){
+        var a = i*Math.PI/6;
+        x.fillStyle = 'rgba(255,0,255,.13)'; x.beginPath(); x.moveTo(0,0); x.arc(0,0,g/2,a,a + .122); x.fill();
+        x.fillStyle = 'rgba(0,255,238,.07)'; x.beginPath(); x.moveTo(0,0); x.arc(0,0,g/2,a + .28,a + .367); x.fill();
+      }
+      var v = x.createRadialGradient(0,0,0,0,0,g/2);
+      v.addColorStop(0,'#000'); v.addColorStop(.72,'rgba(0,0,0,0)');
+      x.globalCompositeOperation = 'destination-in'; x.fillStyle = v; x.fillRect(-g/2,-g/2,g,g);
+    });
+    var fest = [], hyper = [], FARBEN = ['#ffffff','#ffffff','#aef6ff','#ff9df0'], i;
+    for (i = 0; i < 120; i++) fest.push([Math.random(), Math.random()*.55, .6 + Math.random()*1.3, zufall(1, 3), Math.random()*6.3]);
+    for (i = 0; i < 170; i++) hyper.push({ a:Math.random()*6.283, r:Math.pow(Math.random(), 2)*1.1 + .02, v:zufall(.16, .42), f:FARBEN[(Math.random()*4)|0], b:zufall(.7, 2) });
+
+    function groesse(){
+      W = innerWidth; H = innerHeight; S = Math.min(devicePixelRatio || 1, 1.25);
+      cv.width = W*S; cv.height = H*S;
+    }
+    function engel(k, tempo, alpha){
+      if (alpha <= .01 || !ENGEL.complete || !ENGEL.naturalWidth) return;
+      c.globalAlpha = alpha;
+      for (var y = -((zeit*tempo) % k); y < H; y += k) for (var x = 0; x < W; x += k) c.drawImage(ENGEL, x, y, k, k);
+    }
+    function bild(dt){
+      var mx = W*.30, my = H*.44, M = Math.max(W, H), m = Math.min(W, H), g;
+      c.setTransform(S,0,0,S,0,0); c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
+      c.clearRect(0,0,W,H);
+      NEBEL.forEach(function(n){
+        var w = M*1.15, h = M*.75;
+        c.drawImage(n[0], n[1]*W - w/2 + Math.sin(zeit*6.28/n[3])*W*.09, n[2]*H - h/2 + Math.cos(zeit*6.28/n[3]*.8)*H*.08, w, h);
+      });
+      c.save(); c.translate(mx, my); c.rotate(zeit*6.283/90); c.drawImage(STRAHLEN, -M*.6, -M*.6, M*1.2, M*1.2); c.restore();
+      c.fillStyle = '#fff';
+      fest.forEach(function(s){
+        c.globalAlpha = .55 + .42*Math.sin(zeit*s[3] + s[4]);
+        c.fillRect(s[0]*W, s[1]*H, s[2], s[2]);
+      });
+      engel(m*.46, m*.46/60, .5);
+      engel(m*.92, m*.92/34, .34*Math.max(0, Math.sin(zeit/8)));
+      schub += (ziel - schub)*Math.min(1, dt*2.6);
+      c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
+      hyper.forEach(function(s){
+        s.r *= Math.exp(s.v*dt*(1 + schub*9));
+        if (s.r > 1.25){ s.r = zufall(.015, .06); s.a = Math.random()*6.283; }
+        var l = .035 + schub*.42, r1 = s.r*M, r0 = r1*(1 - l), cs = Math.cos(s.a), sn = Math.sin(s.a);
+        c.globalAlpha = Math.min(1, s.r*4)*(.55 + schub*.4);
+        c.strokeStyle = s.f; c.lineWidth = s.b*(.5 + s.r*1.6);
+        c.beginPath(); c.moveTo(mx + cs*r0, my + sn*r0); c.lineTo(mx + cs*r1, my + sn*r1); c.stroke();
+      });
+    }
+    warp = function(){ ziel = 1; setTimeout(function(){ ziel = 0; }, 1500); };
+    groesse();
+    addEventListener('resize', function(){ groesse(); if (ruhig) bild(0); }, {passive:true});
+    if (ruhig){ addEventListener('load', function(){ bild(0); }); return; }
+    requestAnimationFrame(function lauf(t){
+      var dt = vorher ? Math.min(.05, (t - vorher)/1000) : 0;
+      vorher = t; zeit += dt;
+      bild(dt);
+      requestAnimationFrame(lauf);
+    });
+  })();
+
+  /* ---------- Regie ---------------------------------------------
+     Alle Figuren bleiben im Ensemble, aber jede Spielfläche hat nur
+     so viele Plätze. Beutel statt Zufall: alle kommen einmal dran,
+     bevor jemand wiederholt. [Wer, Auftrittsdauer in s] */
+  (function(){
+    var klein = innerWidth < 760;
+    var bahn = function(i){ return '.bahn:nth-child(' + i + ') .ring, .bahn:nth-child(' + i + ') .planet'; };
+    var BUEHNE = [
+      { n:klein ? 2 : 3, wer:['.zwilling','.fransen','.gans-l','.hase-l','.glitch2',['.tuatara',27],'.wab2'] },
+      { n:klein ? 2 : 4, wer:['.loch, #mandala2, .ruessler','.guru','.mond','.schneck','.sternmull','.glitch1','.zwerg','.schmiere','.huehner'] },
+      { n:klein ? 1 : 3, wer:[['.riese',26],'.gans-r','.hase-r','.wab1','.toelpel','.ruesselmeer','.schneck2'] },
+      { n:klein ? 1 : 2, wer:['.laterne','.wuehle','.schlaefer','.frosch','.kopfueber'] },
+      { n:klein ? 1 : 2, wer:['.mund','.geist','.feuerfisch','#mandala1'] },
+      { n:klein ? 1 : 2, wer:[['.ufo',30.5],['.mining',20],['.kurs',30],['.parade',26]] },
+      { n:klein ? 1 : 2, wer:[bahn(2),bahn(3),bahn(4)] }
+    ];
+
+    BUEHNE.forEach(function(b){
+      b.wer = b.wer.map(function(w){
+        var els = [].slice.call(document.querySelectorAll(w.pop ? w[0] : w));
+        els.forEach(function(el){
+          var op = getComputedStyle(el).opacity;
+          if (op !== '1' && !el.classList.contains('ring')) el.style.setProperty('--op', op);
+          el.classList.add('nr');
+        });
+        return { els:els, dauer:w.pop ? w[1] : 0, spielt:false };
+      });
+      b.beutel = [];
+    });
+
+    function naechste(b){
+      for (var v = 0; v < b.wer.length*2; v++){
+        if (!b.beutel.length) b.beutel = b.wer.slice().sort(function(){ return Math.random() - .5; });
+        var w = b.beutel.pop();
+        if (w.spielt) continue;
+        w.els.forEach(function(el){ el.classList.add('da'); });
+        if (w.els.some(function(el){ return getComputedStyle(el).display !== 'none'; })) return w;
+        w.els.forEach(function(el){ el.classList.remove('da'); });
+      }
+      return null;
+    }
+    function auftritt(b, platz, erster){
+      if (!erster && platz % 2 && document.body.classList.contains('sparsam')){
+        setTimeout(function(){ auftritt(b, platz); }, 8000); return;
+      }
+      var w = naechste(b);
+      if (!w) return;
+      w.spielt = true;
+      w.els.forEach(function(el){ void el.offsetWidth; el.classList.add('auf'); });
+      if (ruhig) return;
+      var dauer = w.dauer || zufall(13, 23)*(erster ? zufall(.45, 1) : 1);
+      setTimeout(function(){
+        w.els.forEach(function(el){ el.classList.remove('auf'); });
+        setTimeout(function(){
+          w.els.forEach(function(el){ el.classList.remove('da'); });
+          w.spielt = false;
+        }, 950);
+        setTimeout(function(){ auftritt(b, platz); }, zufall(500, 2600));
+      }, dauer*1000);
+    }
+    var z = 0;
+    BUEHNE.forEach(function(b){
+      for (var i = 0; i < b.n; i++) (function(i){
+        if (ruhig) auftritt(b, i, true);
+        else setTimeout(function(){ auftritt(b, i, true); }, 150*z++);
+      })(i);
+    });
+  })();
+
+  /* ---------- Wortmarke randlos ------------------------------
+     Gemessen wird gegen den Viewport, nie gegen das Element —
+     ein nowrap-Wort weitet sonst den eigenen Kasten und der
+     Schriftgrad läuft davon (in dieser Session gelernt).     */
+  (function(){
+    var el = document.getElementById('marke');
+    var wort = el.querySelector('.mw');
+    var laeuft = false;
+
+    function satz(){
+      var ziel = document.documentElement.clientWidth * 0.99;
+      if (!(ziel > 0)) return;
+      laeuft = true;
+      for (var i = 0; i < 4; i++){
+        var breit = wort.getBoundingClientRect().width;
+        if (!(breit > 0)) break;
+        if (Math.abs(breit - ziel) < 0.5) break;
+        var jetzt = parseFloat(getComputedStyle(el).fontSize);
+        if (!(jetzt > 0)) jetzt = ziel * 0.18;
+        el.style.fontSize = Math.max(24, Math.min(jetzt * (ziel / breit), ziel)) + 'px';
+      }
+      laeuft = false;
+    }
+    satz();
+    addEventListener('load', satz);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(satz);
+    if (window.ResizeObserver){
+      new ResizeObserver(function(){ if (!laeuft) satz(); }).observe(wort);
+    }
+    addEventListener('resize', satz, {passive:true});
+
+    // Wache für die ersten Sekunden: der Font-Swap kommt, wann er will,
+    // und zwischen Swap und Observer-Callback darf kein Frame mit falscher
+    // Grösse sichtbar sein.
+    var t0 = Date.now();
+    (function wache(){
+      var ziel = document.documentElement.clientWidth * 0.99;
+      if (ziel > 0 && Math.abs(wort.getBoundingClientRect().width - ziel) > 1) satz();
+      if (Date.now() - t0 < 3500) requestAnimationFrame(wache);
+    })();
+  })();
+
+  if (ruhig) return;   /* ab hier nur Bewegung */
+
+  /* ---------- Vorbeiflüge ------------------------------------- */
+  (function(){
+    /* [Tier, Breite vmin, Höhe vh, Drift vh, Dauer s, z, Eigendrehung, Rückflug, Farbdrehung] */
+    var F = [
+      ['ente',      27, 46,-22, 21, 12,   0, 0,   0],
+      ['gleit',     25,  6, 34, 27,  9,   8, 1, 160],
+      ['florfliege',24, 60,-38, 24,  9, -24, 0,   0],
+      ['taube',     22, 12, 40, 32, 12, -22, 0,   0],
+      ['glaucus',   20, 70,-50, 29,  9,  18, 0,   0],
+      ['dreibein',  17, 30, 14, 18, 12, -32, 0, 120],
+      ['krampus',   15, 66,-20, 16,  9,   0, 1,   0]
+    ];
+    var wrap = document.getElementById('fluege'), beutel = [];
+    function start(){
+      if (!beutel.length) beutel = F.slice().sort(function(){ return Math.random() - .5; });
+      var f = beutel.pop(), el = document.createElement('div');
+      el.className = 'flug' + (f[7] ? ' rueck' : '');
+      el.style.cssText = '--g:'+f[1]+'vmin;--y:'+f[2]+'vh;--dy:'+f[3]+'vh;--d:'+(f[4]*.8).toFixed(1)+
+        's;--z:'+f[5]+';--rot:'+f[6]+'deg;--hr:'+f[8]+'deg;--fl:'+zufall(.9,1.9).toFixed(2)+'s';
+      el.innerHTML = '<div class="flatter"><div class="schweif"></div><img src="'+T(f[0])+'" alt=""></div>';
+      el.addEventListener('animationend', function(ev){ if (ev.target === el) el.remove(); });
+      wrap.appendChild(el);
+      setTimeout(start, zufall(5000, 9000));
+    }
+    start();
+  })();
+
+  /* ---------- Hyperflug: jeder Durchgang neues Tier, neue Richtung */
+  (function(){
+    var TIERE = ['affe','blatt1','fledermaus','frosch','fuchs','garnele','igel','krampus',
+                 'motte','puppe','sternmull','tenrek','toelpel','weih','ruessler','spiegelei'];
+    var wrap = document.getElementById('hyperflug'), N = 4, D = 12;
+    function wuerfeln(el){
+      var w = Math.random()*Math.PI*2, r = zufall(75, 110);
+      el.src = T(TIERE[(Math.random()*TIERE.length)|0]);
+      el.style.setProperty('--dx', (Math.cos(w)*r).toFixed(0)+'vmax');
+      el.style.setProperty('--dy', (Math.sin(w)*r*.7).toFixed(0)+'vmax');
+      el.style.setProperty('--rot', zufall(-420, 420).toFixed(0)+'deg');
+    }
+    for (var i = 0; i < N; i++){
+      var el = document.createElement('img');
+      el.alt = ''; el.className = 'hyper';
+      el.style.cssText = '--d:'+D+'s;--dl:-'+(i*D/N).toFixed(2)+'s;--z:'+(i % 3 ? 8 : 12);
+      wuerfeln(el);
+      el.addEventListener('animationiteration', function(){ wuerfeln(this); });
+      wrap.appendChild(el);
+    }
+  })();
+
+  /* ---------- Warpsprung -------------------------------------- */
+  (function(){
+    function sprung(){
+      warp();
+      setTimeout(sprung, zufall(11000, 19000));
+    }
+    setTimeout(sprung, 3000);
+  })();
+
+  /* ---------- Sparbetrieb --------------------------------------
+     Median statt Mittelwert: einzelne Ruckler beim Bilderladen sollen
+     die Seite nicht dauerhaft herunterstufen. */
+  addEventListener('load', function(){
+    setTimeout(function(){
+      var proben = [], vorher = 0;
+      requestAnimationFrame(function messen(t){
+        if (document.hidden) return;
+        if (vorher) proben.push(t - vorher);
+        vorher = t;
+        if (proben.length < 120) { requestAnimationFrame(messen); return; }
+        proben.sort(function(a, b){ return a - b; });
+        if (proben[60] > 30) document.body.classList.add('sparsam');
+      });
+    }, 2500);
+  });
+
+  /* ---------- Parallax + Cursor: EIN rAF, direkte transforms --
+     Faktoren werden einmal beim Start aus --px/--py gelesen, danach
+     schreibt jeder Frame nur noch transform auf die Wrapper und den
+     Cursor. Kein Style-Recalc über das ganze Dokument, kein Layout. */
+  (function(){
+    if (!fein) return;
+    var wrapper = [];
+    document.querySelectorAll('.pw').forEach(function(el){
+      var cs = getComputedStyle(el);
+      var px = parseFloat(cs.getPropertyValue('--px')) || 0;
+      var py = parseFloat(cs.getPropertyValue('--py')) || 0;
+      if (px || py) wrapper.push([el, px, py]);
+    });
+    var c = document.getElementById('cursor');
+    var szene = document.getElementById('szene');
+    c.style.left = '0'; c.style.top = '0';
+
+    var zx = 0, zy = 0, cx = -40, cy = -40, geplant = false;
+
+    function mal(){
+      geplant = false;
+      c.style.transform = 'translate3d(' + cx + 'px,' + cy + 'px,0) translate(-50%,-50%)';
+      szene.style.transform = 'rotateX(' + (zy * -9) + 'deg) rotateY(' + (zx * 12) + 'deg)';
+      for (var i = 0; i < wrapper.length; i++){
+        var w = wrapper[i];
+        w[0].style.transform = 'translate3d(' + (zx * w[1]) + 'px,' + (zy * w[2]) + 'px,0)';
+      }
+    }
+    addEventListener('mousemove', function(e){
+      cx = e.clientX; cy = e.clientY;
+      zx = (e.clientX / innerWidth  - .5) * 2;
+      zy = (e.clientY / innerHeight - .5) * 2;
+      if (!geplant){ geplant = true; requestAnimationFrame(mal); }
+    }, {passive:true});
+  })();
+
+  /* ---------- Spasmus ---------------------------------------- */
+  (function(){
+    function zucken(){
+      document.body.classList.add('spasm');
+      setTimeout(function(){ document.body.classList.remove('spasm'); }, 260);
+      setTimeout(zucken, 5200 + Math.random()*3800);
+    }
+    setTimeout(zucken, 4200);
+  })();
+
+  /* ---------- Maus-Trail: gedeckelt --------------------------
+     Ohne mix-blend-mode: jedes gemischte Fragment zwingt den Browser,
+     den Hintergrund dahinter neu zu verrechnen — bei 20 Stück gleich-
+     zeitig stockt der Compositor. Der Farb-Punch kommt jetzt allein
+     aus dem (einmal gerasterten) Filter; animiert wird nur noch
+     transform/opacity. */
+  var POOL = ['img/cut/01.webp','img/cut/03.webp','img/cut/04.webp',
+              'img/cut/08.webp','img/cut/10.webp','img/cut/13.webp',
+              'img/cut/15.webp',
+              T('kaefer'), T('frosch'), T('blatt1'), T('puppe'), T('motte'),
+              T('glaucus'), T('igel'), T('garnele'), T('fledermaus')];
+  var lebend = 0, LIMIT = 14;
+
+  /* Pool vorwärmen, damit das erste Fragment keinen Netz-Ruckler hat */
+  POOL.forEach(function(u){ var i = new Image(); i.src = u; });
+
+  (function(){
+    if (!fein) return;
+    var drossel = 0;
+    addEventListener('mousemove', function(e){
+      var t = Date.now();
+      if (t - drossel < 150 || lebend >= LIMIT) return;
+      drossel = t;
+      var el = document.createElement('img');
+      el.src = POOL[(Math.random()*POOL.length)|0];
+      el.style.cssText = 'position:fixed;left:'+(e.clientX-27)+'px;top:'+(e.clientY-27)+
+        'px;width:54px;pointer-events:none;z-index:12;'+
+        'filter:hue-rotate('+((Math.random()*360)|0)+'deg) saturate(3.5) contrast(1.4);'+
+        'opacity:.85;transition:opacity 1s ease,transform 1s ease;';
+      document.body.appendChild(el);
+      lebend++;
+      requestAnimationFrame(function(){
+        el.style.opacity = '0';
+        el.style.transform = 'scale('+(0.4+Math.random()*2.2)+') rotate('+((Math.random()*140-70)|0)+'deg)';
+      });
+      setTimeout(function(){ el.remove(); lebend--; }, 1100);
+    }, {passive:true});
+  })();
+
+  /* ---------- Klick/Tap-Explosion ----------------------------- */
+  function explosion(x, y){
+    salve(x, y);
+    for (var i = 0; i < 5 && lebend < LIMIT; i++){
+      var el = document.createElement('img');
+      el.src = POOL[(Math.random()*POOL.length)|0];
+      var gr = 40 + Math.random()*90;
+      var wink = Math.random()*Math.PI*2;
+      var weit = 60 + Math.random()*180;
+      var pts = '';
+      for (var p = 0; p < 5; p++) pts += (Math.random()*100)+'% '+(Math.random()*100)+'%,';
+      el.style.cssText = 'position:fixed;left:'+(x-gr/2)+'px;top:'+(y-gr/2)+'px;width:'+gr+
+        'px;pointer-events:none;z-index:13;'+
+        'filter:hue-rotate('+((Math.random()*360)|0)+'deg) saturate('+(2+Math.random()*4)+') contrast(1.5);'+
+        'clip-path:polygon('+pts.slice(0,-1)+');'+
+        'transition:transform 1s ease-out,opacity 1s ease-out;opacity:1;';
+      document.body.appendChild(el);
+      lebend++;
+      (function(el, wink, weit){
+        requestAnimationFrame(function(){
+          el.style.transform = 'translate('+(Math.cos(wink)*weit)+'px,'+(Math.sin(wink)*weit)+
+            'px) rotate('+((Math.random()*240-120)|0)+'deg) scale('+(0.3+Math.random())+')';
+          el.style.opacity = '0';
+        });
+      })(el, wink, weit);
+      setTimeout(function(){ el.remove(); lebend--; }, 1100);
+    }
+  }
+  addEventListener('click', function(e){ explosion(e.clientX, e.clientY); });
+  addEventListener('touchstart', function(e){
+    if (e.touches.length) explosion(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:true});
+})();
+</script>
+</body>
+</html>
